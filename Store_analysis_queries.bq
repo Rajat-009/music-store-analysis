@@ -1,0 +1,120 @@
+/* Q1: Who is the senior most employee based on job title? */
+
+SELECT * FROM storedata-009.music_data.employee
+order by levels desc
+limit 1;
+
+--======================
+/* Q2: Which countries have the most Invoices? */
+
+SELECT COUNT(invoice_id), billing_country
+FROM storedata-009.music_data.invoice
+GROUP BY billing_country
+ORDER BY COUNT(invoice_id) DESC;
+
+--=======================
+-- TOP THREE VALUES OF INVOICE
+
+SELECT TOTAL AS max_invoices FROM storedata-009.music_data.invoice
+ORDER BY total DESC
+LIMIT 3;
+--==========================
+
+/* Q4: Which city has the best customers? We would like to throw a promotional Music Festival in the city we made the most money. 
+Write a query that returns one city that has the highest sum of invoice totals. 
+Return both the city name & sum of all invoice totals */
+-- name of the city that has highest sum of total invoices
+
+
+select billing_city, SUM(total) as T from storedata-009.music_data.invoice
+group by billing_city
+order by T desc
+;
+
+
+--=========================
+/* Q5: Who is the best customer? The customer who has spent the most money will be declared the best customer. 
+Write a query that returns the person who has spent the most money.*/
+
+
+SELECT 
+  C.customer_id,
+  C.first_name,
+  SUM(I.total) AS total
+FROM 
+  `storedata-009.music_data.customer` AS C
+JOIN 
+  `storedata-009.music_data.invoice` AS I
+ON 
+  C.customer_id = I.customer_id
+GROUP BY 
+  C.customer_id, C.first_name
+ORDER BY 
+  total DESC
+LIMIT 1;
+
+
+--=============================================================
+
+--====================
+/* Q1: Write query to return the email, first name, last name, & Genre of all Rock Music listeners. 
+Return your list ordered alphabetically by email starting with A. */
+
+SELECT DISTINCT email,first_name,last_name,city from
+ storedata-009.music_data.customer as customer
+JOIN  storedata-009.music_data.invoice as invoice ON
+customer.customer_id = invoice.customer_id
+JOIN storedata-009.music_data.invoice_line as invoiceLine ON
+invoice.invoice_id = invoiceLine.invoice_id
+WHERE track_id IN (
+  select track_id from storedata-009.music_data.track as track
+  JOIN storedata-009.music_data.genre as genre ON
+  track.genre_id = genre.genre_id
+  WHERE genre.name like "Rock"
+)
+order by email;
+
+
+--==========================================
+/* Q2: Let's invite the artists who have written the most rock music in our dataset. 
+Write a query that returns the Artist name and total track count of the top 10 rock bands. */
+
+
+SELECT artist.artist_id, artist.name, count(artist.artist_id) as nos
+from storedata-009.music_data.track as track
+JOIN storedata-009.music_data.album as album ON
+album.album_id = track.album_id 
+JOIN storedata-009.music_data.artist AS artist ON
+artist.artist_id = album.artist_id
+JOIN storedata-009.music_data.genre AS genre ON
+genre.genre_id = track.genre_id
+WHERE genre.name LIKE "Rock"
+group by artist.artist_id, artist.name
+order by nos DESC;
+
+
+--===========================================
+/* Q3: Return all the track names that have a song length longer than the average song length. 
+Return the Name and Milliseconds for each track. Order by the song length with the longest songs listed first. */
+
+
+select name, milliseconds from storedata-009.music_data.track as track 
+where milliseconds > (
+  select avg(milliseconds) from storedata-009.music_data.track as track
+)
+order by milliseconds desc;
+
+
+--===============================================================
+
+
+
+
+
+
+
+
+
+
+
+
